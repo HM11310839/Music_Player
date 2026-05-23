@@ -6,9 +6,9 @@ import glob
 app = Flask(__name__)
 
 # 配置
-app.config['VIDEO_FOLDER'] = 'fvideos'
+app.config['VIDEO_FOLDER'] = 'D:/Music/「Hello」初音ミク特别演唱会（20260214夜公演）/Songs-Origin'
 app.config['IMAGE_FOLDER'] = 'images'
-app.config['LYRIC_FOLDER'] = 'flyrics'
+app.config['LYRIC_FOLDER'] = 'D:/Music/「Hello」初音ミク特别演唱会（20260214夜公演）'
 app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB 文件大小限制
 
@@ -36,7 +36,7 @@ def get_lyric_Foreign():
     if len(videos):
         for video in videos:
             try:
-                v = app.config['LYRIC_FOLDER'] + "/foreign/" + video[0:-4] + ".txt"
+                v = os.path.join(app.config['LYRIC_FOLDER'], "foreign", (video[0:-4] + ".lyric"))
                 file = open(v, "r", encoding="utf-8")
                 file.readline()
                 lyric = file.read()
@@ -57,7 +57,7 @@ def get_lyric_Chinese():
     if len(videos) :
         for video in videos:
             try:
-                v = app.config['LYRIC_FOLDER'] + "/chinese/"+video[0:-4] + ".txt"
+                v = os.path.join(app.config['LYRIC_FOLDER'], "chinese", (video[0:-4] + ".lyric"))
                 file = open(v, "r", encoding="utf-8")
                 file.readline()
                 lyric = file.read()
@@ -86,6 +86,11 @@ def index():
 @app.route('/goto/<file>')
 @app.route('/go/<file>')
 def change(file):
+    """
+    改变Video Folder(基本不用了)
+    :param file: 新的Video Folder路径
+    :type file: str
+    """
     if 'root' in file or 'r' in file or file == 'videos' or file == 'video':
         app.config['VIDEO_FOLDER'] = 'videos'
     elif 'videos ' in file or 'videos_' in file:
@@ -102,6 +107,12 @@ def change(file):
 
 @app.route('/path_submit',methods=['POST','GET'])
 def path_submit():
+    """
+    改变Video Folder
+    Post这个页面;
+    /path_submit?video_path=,lyric_path=,
+    Or {{url_for('path_submit'),video_path=,lyric_path=,}}
+    """
     if request.method == 'POST':
         vp = request.form.get('video_path')
         lp = request.form.get('lyric_path')
@@ -120,6 +131,7 @@ def path_submit():
 
 @app.route('/about')
 def about():
+    """关于 页面"""
     about_html = '''
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -163,7 +175,7 @@ def about():
         <p><a href="{{url_for('path_submit', video_path='D:/Music/「Hello」初音ミク特别演唱会（20260214夜公演）/Songs-Origin', lyric_path='D:/Music/「Hello」初音ミク特别演唱会（20260214夜公演）')}}">演唱会 原曲</a></p>
         <br>
         <form action="/path_submit" method="post">
-            <input type="text" name="file" placeholder="请输入跳转地址" size="50">
+            <input type="text" name="video_path" placeholder="请输入跳转地址" size="50">
             <button type="submit">跳转</button>
         </form>
         <br><br>
@@ -184,11 +196,13 @@ def get_videos():
 
 @app.route('/api/lyrics_foreign')
 def get_lyric_foreign():
+    """获取Foreign lyric的API"""
     lyrics = get_lyric_Foreign()
     return jsonify(lyrics)
 
 @app.route('/api/lyric_chinese')
 def get_lyric_chinese():
+    """获取Chinese lyric的API"""
     lyrics = get_lyric_Chinese()
     return jsonify(lyrics)
 

@@ -1,4 +1,4 @@
-first = 0;
+first = 12;
 class VideoPlayer {
     constructor() {
         this.videoElement = document.getElementById('videoPlayer');
@@ -8,6 +8,8 @@ class VideoPlayer {
         this.currentLyricChinese = document.getElementById('currentLyricChinese');
         this.debugInfo = document.getElementById('debugInfo');
         this.lyricTitle = document.getElementById('Lyric');
+        this.lyricContainer = document.getElementById('lyricContainer');
+        this.shuffleButtonInfo = document.getElementById('shuffleButtonInfo');
         this.videos = [];
         this.lyrics_foreign = [];
         this.lyrics_chinese = [];
@@ -114,6 +116,7 @@ class VideoPlayer {
     showLyric() {
         const showLyric = document.getElementById('showLyric').checked;
         if (showLyric){
+            this.lyricContainer.style = "";
             const index = this.currentIndex;
             const videoFile = this.videos[index];
             const lf = this.lyrics_foreign[index];
@@ -127,46 +130,51 @@ class VideoPlayer {
             this.lyricTitle.innerHTML = "";
             this.currentLyricForeign.innerHTML = "";
             this.currentLyricChinese.innerHTML = "";
+            this.lyricContainer.style = "display:none";
         }
+    }
+
+    getNextIndex(indexNow) {
+        let nextIndex;
+        switch (this.playMode) {
+            case 'sequential':
+                nextIndex = (indexNow + 1) % this.videos.length;
+                break;
+            case 'loop':
+                nextIndex = indexNow;
+                break;
+            case 'shuffle':
+                const currentVideo = this.videos[indexNow];
+                const shuffledIndex = this.shuffledList.indexOf(currentVideo);
+                nextIndex = this.videos.indexOf(this.shuffledList[(shuffledIndex + 1) % this.shuffledList.length]);
+                break;
+        }
+        return nextIndex;
     }
 
     debugMode() {
         const debugMode = document.getElementById('debugMode').checked;
         if (debugMode){
-            let nextIndex;
-            let nnextIndex;
-            let nnnextIndex;
-            switch (this.playMode) {
-                case 'sequential':
-                    nextIndex = (this.currentIndex + 1) % this.videos.length;
-                    nnextIndex = (this.currentIndex + 2) % this.videos.length;
-                    nnnextIndex = (this.currentIndex + 3) % this.videos.length;
-                    break;
-                case 'loop':
-                    nextIndex = this.currentIndex;
-                    nnextIndex = this.currentIndex;
-                    nnnextIndex = this.currentIndex;
-                    break;
-                case 'shuffle':
-                    const currentVideo = this.videos[this.currentIndex];
-                    const shuffledIndex = this.shuffledList.indexOf(currentVideo);
-                    nextIndex = this.videos.indexOf(this.shuffledList[(shuffledIndex + 1) % this.shuffledList.length]);
-                    nnextIndex = this.videos.indexOf(this.shuffledList[(shuffledIndex + 2) % this.shuffledList.length]);
-                    nnnextIndex = this.videos.indexOf(this.shuffledList[(shuffledIndex + 3) % this.shuffledList.length]);
-                    break;
+            const nextLength = 5
+            let info = ""
+                + "  Now index:<br>"
+                + this.videos[this.currentIndex] + " (" + this.currentIndex + ")<br>"
+                + "  Next play:<br>";
+            let nextIndex = this.currentIndex;
+            for (var i = 1; i <= nextLength; i++){
+                nextIndex = this.getNextIndex(nextIndex);
+                info = info + this.videos[nextIndex] + " (" + nextIndex + ")<br>";
             }
-            const info = "------Debug Info------<br>"
-                + "Now index:<br>" + this.videos[this.currentIndex] + " (" + this.currentIndex + ")<br>"
-                + "Next play:<br>" + this.videos[nextIndex] + " (" + nextIndex + ")<br>"
-                + this.videos[nnextIndex] + " (" + nnextIndex + ")<br>"
-                + this.videos[nnnextIndex] + " (" + nnnextIndex + ")<br>";
+            info += "<br>";
             this.debugInfo.innerHTML = info;
-            console.log("Now index:" + this.currentIndex + ":" + this.videos[this.currentIndex])
-            console.log("Video list:\n" + this.videos)
-            console.log("Video shuffled:\n" + this.shuffledList)
+            this.shuffleButtonInfo.innerHTML = "刷新播放列表";
+            console.log("Now index:" + this.currentIndex + ":" + this.videos[this.currentIndex]);
+            console.log("Video list:\n" + this.videos);
+            console.log("Video shuffled:\n" + this.shuffledList);
         }
         else{
             this.debugInfo.innerHTML = "";
+            this.shuffleButtonInfo.innerHTML = "";
         }
     }
 
@@ -192,7 +200,9 @@ class VideoPlayer {
                 break;
         }
 
-        this.loadVideo(nextIndex);
+        const deltaTmin = 500;
+        const deltaTmax = 2000;
+        setTimeout(this.loadVideo(nextIndex),Math.floor(Math.random() * (deltaTmax - deltaTmin + 1)) + deltaTmin);
     }
 
     playPrev() {
@@ -386,6 +396,12 @@ class VideoPlayer {
 
         //调试模式
         document.getElementById('debugMode').addEventListener('click', () => {
+            this.debugMode();
+        });
+
+        //刷新播放列表
+        document.getElementById('shuffleButton').addEventListener('click', () => {
+            this.shuffleVideos();
             this.debugMode();
         });
     }

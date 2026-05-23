@@ -378,6 +378,26 @@ footer {
     background: #555;
 }
 
+.shuffle-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: black;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.shuffle-button:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+.shuffle-button:active {
+    color: #666;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .player-section {
