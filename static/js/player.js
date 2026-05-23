@@ -202,7 +202,7 @@ class VideoPlayer {
 
         const deltaTmin = 500;
         const deltaTmax = 2000;
-        setTimeout(this.loadVideo(nextIndex),Math.floor(Math.random() * (deltaTmax - deltaTmin + 1)) + deltaTmin);
+        setTimeout(this.loadVideo,Math.floor(Math.random() * (deltaTmax - deltaTmin + 1)) + deltaTmin, nextIndex);
     }
 
     playPrev() {
