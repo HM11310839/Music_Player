@@ -68,7 +68,8 @@ class VideoPlayer {
                         <i class="fas fa-video"></i>
                         ${video}
                     </div>
-                    <button class="delete-btn" onclick="player.deleteVideo('${video}')">
+                    <button class="delete-btn" onclick="player.deleteVideo(\`${video}\`)">
+                        <!--修复日志：需用\`\`代替''，否则遇到如I can't wait等会报错-->
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
